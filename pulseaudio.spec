@@ -6,7 +6,7 @@
 Name:           pulseaudio
 Summary:        Improved Linux Sound Server
 Version:        12.2
-Release:        2
+Release:        3
 License:        LGPLv2+
 URL:            https://www.freedesktop.org/wiki/Software/PulseAudio
 Source0:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz
@@ -50,7 +50,7 @@ qpaeq is a equalizer interface for pulseaudio's equalizer sinks.
 Summary:        Headers and libraries for PulseAudio client development
 License:        LGPLv2+
 Requires:       %{name} = %{version}-%{release}
-Provides:       %{name}-libs-devel
+Provides:       %{name}-libs-devel %{name}-libs-devel%{?_isa}
 Obsoletes:      %{name}-libs-devel
 
 %description    devel
@@ -200,5 +200,11 @@ exit 0
 %{_datadir}/glib-2.0/schemas/org.freedesktop.pulseaudio.gschema.xml
 
 %changelog
+* Fri Oct 18 2019 shenyangyang <shenyangyang4@huawei.com> - 12.2-3
+- Type:enhancement
+- ID:NA
+- SUG:NA
+- DESC:add provides of pulseaudio-libs-devel(aarch-64) needed by libmikmod-devel
+
 * Mon Sep 16 2019 openEuler Buildteam <buildteam@openeuler.org> - 12.2-2
 - Package init
