@@ -5,8 +5,8 @@
 
 Name:           pulseaudio
 Summary:        Improved Linux Sound Server
-Version:        12.2
-Release:        3
+Version:        13.0
+Release:        1
 License:        LGPLv2+
 URL:            https://www.freedesktop.org/wiki/Software/PulseAudio
 Source0:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz
@@ -15,8 +15,6 @@ Source5:        default.pa-for-gdm
 
 Patch201:       pulseaudio-autostart.patch
 Patch202:       pulseaudio-9.0-disable_flat_volumes.patch
-#From: Tanu Kaskinen <tanuk@iki.fi>
-Patch8:         0008-set-exit_idle_time-to-0-when-we-detect-a-session.patch
 
 BuildRequires:  automake libtool gcc-c++ bash-completion
 BuildRequires:  m4 libtool-ltdl-devel intltool pkgconfig doxygen xmltoman libsndfile-devel
@@ -161,6 +159,7 @@ exit 0
 %{_bindir}/pax11publish
 %{_bindir}/padsp
 %{_bindir}/pasuspender
+%{_bindir}/pa-info
 %ifarch %{multilib_archs}
 %{_bindir}/padsp-32
 %endif
@@ -200,6 +199,9 @@ exit 0
 %{_datadir}/glib-2.0/schemas/org.freedesktop.pulseaudio.gschema.xml
 
 %changelog
+* Fri Apr 24 2020 Chunsheng Luo <luochunsheng@huawei.com> - 13.0-1
+- update to version 13.0
+
 * Fri Oct 18 2019 shenyangyang <shenyangyang4@huawei.com> - 12.2-3
 - Type:enhancement
 - ID:NA
