@@ -6,7 +6,7 @@
 Name:           pulseaudio
 Summary:        Improved Linux Sound Server
 Version:        13.0
-Release:        2
+Release:        3
 License:        LGPLv2+
 URL:            https://www.freedesktop.org/wiki/Software/PulseAudio
 Source0:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz
@@ -55,15 +55,6 @@ Obsoletes:      %{name}-libs-devel
 Headers and libraries for developing applications that can communicate with
 a PulseAudio sound server.
 
-%package        gdm-hooks
-Summary:        PulseAudio GDM integration
-License:        LGPLv2+
-Requires:       gdm >= 1:2.22.0
-Requires(pre):  gdm
-
-%description    gdm-hooks
-This package contains GDM integration hooks for the PulseAudio sound server.
-
 %package_help
 
 %prep
@@ -103,8 +94,6 @@ popd
 
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/lib/udev/rules.d
 mv -fv $RPM_BUILD_ROOT/lib/udev/rules.d/90-pulseaudio.rules $RPM_BUILD_ROOT%{_prefix}/lib/udev/rules.d
-
-install -p -m644 -D %{SOURCE5} $RPM_BUILD_ROOT%{_localstatedir}/lib/gdm/.pulse/default.pa
 
 %delete_la
 
@@ -189,9 +178,6 @@ exit 0
 %{_datadir}/vala/vapi/*
 %{_libdir}/cmake/PulseAudio/
 
-%files gdm-hooks
-%attr(0600,gdm,gdm) %{_localstatedir}/lib/gdm/.pulse/default.pa
-
 %files help
 %defattr(-,root,root)
 %doc README doxygen/html
@@ -199,6 +185,9 @@ exit 0
 %{_datadir}/glib-2.0/schemas/org.freedesktop.pulseaudio.gschema.xml
 
 %changelog
+* Sun Sep 14 2020 xinghe <xinghe1@huawei.com> - 13.0-3
+- remove repeat gdm-hooks packages
+
 * Fri Aug 21 2020 lunankun <lunankun@huawei.com> - 13.0-2
 - Type:bugfix
 - Id:NA
