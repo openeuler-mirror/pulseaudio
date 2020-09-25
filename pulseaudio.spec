@@ -6,7 +6,7 @@
 Name:           pulseaudio
 Summary:        Improved Linux Sound Server
 Version:        13.0
-Release:        2
+Release:        3
 License:        LGPLv2+
 URL:            https://www.freedesktop.org/wiki/Software/PulseAudio
 Source0:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz
@@ -185,6 +185,9 @@ exit 0
 %{_datadir}/glib-2.0/schemas/org.freedesktop.pulseaudio.gschema.xml
 
 %changelog
+* Fri Sep 25 2020 xinghe <xinghe1@huawei.com> - 13.0-3
+- remove old tar packages
+
 * Sun Sep 14 2020 xinghe <xinghe1@huawei.com> - 13.0-2
 - remove repeat gdm-hooks packages
 
