@@ -6,7 +6,7 @@
 Name:           pulseaudio
 Summary:        Improved Linux Sound Server
 Version:        13.0
-Release:        3
+Release:        4
 License:        LGPLv2+
 URL:            https://www.freedesktop.org/wiki/Software/PulseAudio
 Source0:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz
@@ -164,6 +164,7 @@ exit 0
 %{_datadir}/pulseaudio/alsa-mixer/*/
 %{_datadir}/zsh/site-functions/_pulseaudio
 %{_datadir}/GConf/gsettings/pulseaudio.convert
+%{_datadir}/glib-2.0/schemas/org.freedesktop.pulseaudio.gschema.xml
 
 %files qpaeq
 %defattr(-,root,root)
@@ -182,9 +183,11 @@ exit 0
 %defattr(-,root,root)
 %doc README doxygen/html
 %{_mandir}/man*/*
-%{_datadir}/glib-2.0/schemas/org.freedesktop.pulseaudio.gschema.xml
 
 %changelog
+* Tue Oct 13 2020 chenbo pan <panchenbo@uniontech.com> - 13.0-4
+- fix /usr/libexec/pulse/gsettings-helper coredump
+
 * Sun Sep 14 2020 xinghe <xinghe1@huawei.com> - 13.0-3
 - remove repeat gdm-hooks packages
 
