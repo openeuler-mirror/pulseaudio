@@ -6,7 +6,7 @@
 Name:           pulseaudio
 Summary:        Improved Linux Sound Server
 Version:        13.0
-Release:        3
+Release:        4
 License:        LGPLv2+
 URL:            https://www.freedesktop.org/wiki/Software/PulseAudio
 Source0:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz
@@ -40,7 +40,7 @@ Enlightened Sound Daemon (ESOUND).
 %package        qpaeq
 Summary:        Pulseaudio equalizer interface
 Requires:       %{name} = %{version}-%{release}
-Requires:       python2-qt5 dbus-python
+Requires:       python3-qt5 python3-dbus
 %description    qpaeq
 qpaeq is a equalizer interface for pulseaudio's equalizer sinks.
 
@@ -185,6 +185,9 @@ exit 0
 %{_datadir}/glib-2.0/schemas/org.freedesktop.pulseaudio.gschema.xml
 
 %changelog
+* Fri Oct 30 2020 xinghe <xinghe1@huawei.com> - 13.0-4
+- remove python2 dependency
+
 * Fri Sep 25 2020 xinghe <xinghe1@huawei.com> - 13.0-3
 - remove old tar packages
 
