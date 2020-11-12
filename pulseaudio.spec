@@ -6,7 +6,7 @@
 Name:           pulseaudio
 Summary:        Improved Linux Sound Server
 Version:        13.0
-Release:        2
+Release:        3
 License:        LGPLv2+
 URL:            https://www.freedesktop.org/wiki/Software/PulseAudio
 Source0:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz
@@ -31,6 +31,7 @@ Obsoletes:      %{name}-module-x11 %{name}-module-bluetooth %{name}-libs %{name}
 
 Requires(pre):  shadow-utils
 Requires:       rtkit bluez >= 5.0
+Recommends:	%{name}-help = %{version}-%{release}
 
 %description
 PulseAudio is a sound server for Linux and other Unix like operating
@@ -199,6 +200,9 @@ exit 0
 %{_datadir}/glib-2.0/schemas/org.freedesktop.pulseaudio.gschema.xml
 
 %changelog
+* Thu Nov 11 2020 xinghe <xinghe1@huawei.com> - 13.0-3
+- add help for Recommends
+
 * Fri Aug 21 2020 lunankun <lunankun@huawei.com> - 13.0-2
 - Type:bugfix
 - Id:NA
