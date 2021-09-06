@@ -6,7 +6,7 @@
 Name:           pulseaudio
 Summary:        Improved Linux Sound Server
 Version:        13.0
-Release:        4
+Release:        5
 License:        LGPLv2+
 URL:            https://www.freedesktop.org/wiki/Software/PulseAudio
 Source0:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz
@@ -97,6 +97,15 @@ mv -fv $RPM_BUILD_ROOT/lib/udev/rules.d/90-pulseaudio.rules $RPM_BUILD_ROOT%{_pr
 
 %delete_la
 
+## delete rpath
+touch %{name}-%{_arch}.conf
+echo "%{_libdir}/pulse-%{version}/modules"  >> %{name}-%{_arch}.conf
+echo "%{_libdir}/%{name}/"  >> %{name}-%{_arch}.conf
+find $RPM_BUILD_ROOT/ -type f -exec file {} ';' | grep "ELF" | awk -F ':' '{print $1}' | xargs -i chrpath --delete {}
+mkdir -p $RPM_BUILD_ROOT/etc/ld.so.conf.d
+install -p -m644 %{name}-%{_arch}.conf $RPM_BUILD_ROOT/etc/ld.so.conf.d/
+
+
 %check
 %make_build check || TESTS_ERROR=$?
 if [ "${TESTS_ERROR}" != "" ]; then
@@ -131,6 +140,7 @@ exit 0
 %config(noreplace) %{_sysconfdir}/pulse/daemon.conf
 %config(noreplace) %{_sysconfdir}/pulse/*.pa
 %config(noreplace) %{_sysconfdir}/pulse/client.conf
+%{_sysconfdir}/ld.so.conf.d/%{name}-%{_arch}.conf
 %{_sysconfdir}/dbus-1/system.d/pulseaudio-system.conf
 %{_sysconfdir}/xdg/autostart/pulseaudio.desktop
 %{bash_completionsdir}/*
@@ -185,6 +195,9 @@ exit 0
 %{_datadir}/glib-2.0/schemas/org.freedesktop.pulseaudio.gschema.xml
 
 %changelog
+* Fri Sep 3 2021 zhouwenpei <zhouwenpei11@huawei.com> - 13.0-5
+- delete rpath info
+
 * Fri Oct 30 2020 xinghe <xinghe1@huawei.com> - 13.0-4
 - remove python2 dependency
 
