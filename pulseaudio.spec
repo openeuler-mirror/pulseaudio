@@ -6,7 +6,7 @@
 Name:           pulseaudio
 Summary:        Improved Linux Sound Server
 Version:        15.0
-Release:        1
+Release:        2
 License:        LGPLv2+
 URL:            https://www.freedesktop.org/wiki/Software/PulseAudio
 Source0:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz
@@ -27,9 +27,11 @@ BuildRequires:  webrtc-audio-processing-devel
 BuildRequires:	pkgconfig(gstreamer-1.0) pkgconfig(gstreamer-app-1.0) pkgconfig(gstreamer-rtp-1.0)
 
 Obsoletes:      padevchooser < 1.0
+Provides:       %{name}-module-x11 %{name}-utils %{name}-esound-compat %{name}-module-zeroconf %{name}-module-gconf %{name}-module-gsettings
+Obsoletes:      %{name}-module-x11 %{name}-utils %{name}-esound-compat %{name}-module-zeroconf %{name}-module-gconf %{name}-module-gsettings
 
 Requires(pre):  shadow-utils
-Requires:       rtkit bluez >= 5.0
+Requires:       rtkit bluez >= 5.0 webrtc-audio-processing
 
 %description
 PulseAudio is a sound server for Linux and other Unix like operating
@@ -43,13 +45,39 @@ Requires:       python3-qt5 python3-dbus
 %description    qpaeq
 qpaeq is a equalizer interface for pulseaudio's equalizer sinks.
 
-%package        devel
+%package module-bluetooth
+Summary:        Bluetooth support for the PulseAudio sound server
+Requires:       %{name} = %{version}-%{release}
+Requires:       bluez >= 5.0
+	
+%description module-bluetooth
+Contains Bluetooth audio (A2DP/HSP/HFP) support for the PulseAudio sound server.
+
+%package libs
+Summary:        Libraries for PulseAudio clients
+License:        LGPLv2+
+Obsoletes:      pulseaudio-libs-zeroconf < 1.1
+
+%description libs
+This package contains the runtime libraries for any application that wishes
+to interface with a PulseAudio sound server.
+
+%package libs-glib2
+Summary:        GLIB 2.x bindings for PulseAudio clients
+License:        LGPLv2+
+Requires:       %{name}-libs = %{version}-%{release}
+ 
+%description libs-glib2
+This package contains bindings to integrate the PulseAudio client library with
+a GLIB 2.x based application.
+
+%package libs-devel
 Summary:        Headers and libraries for PulseAudio client development
 License:        LGPLv2+
-Requires:       %{name} = %{version}-%{release}
-Provides:       %{name}-libs-devel %{name}-libs-devel%{?_isa}
+Requires:       %{name}-libs = %{version}-%{release}
+Requires:       %{name}-libs-glib2 = %{version}-%{release}
 
-%description    devel
+%description libs-devel
 Headers and libraries for developing applications that can communicate with
 a PulseAudio sound server.
 
@@ -69,8 +97,8 @@ sed -i.no_consolekit -e \
   -D system_group=pulse \
   -D access_group=pulse-access \
   -D oss-output=disabled \
-  -D jack=%{?enable_jack:enabled}%{!?enable_jack:disabled} \
-  -D lirc=%{?enable_lirc:enabled}%{!?enable_lirc:disabled} \
+  -D jack=disabled \
+  -D lirc=disabled \
   -D tcpwrap=disabled \
   -D bluez5=enabled \
   -D gstreamer=enabled \
@@ -79,10 +107,10 @@ sed -i.no_consolekit -e \
   -D elogind=disabled \
   -D valgrind=disabled \
   -D gtk=disabled \
-  -D soxr=%{?fedora:enabled}%{!?fedora:disabled} \
-  -D webrtc-aec=%{?with_webrtc:enabled}%{!?with_webrtc:disabled} \
-  -D systemd=%{?systemd:enabled}%{!?systemd:disabled} \
-  -D tests=%{?tests:true}%{!?tests:false}
+  -D soxr=disabled \
+  -D webrtc-aec=enabled \
+  -D systemd=disabled \
+  -D tests=true
  
 %meson_build
 
@@ -97,7 +125,7 @@ mv -fv $RPM_BUILD_ROOT/lib/udev/rules.d/90-pulseaudio.rules $RPM_BUILD_ROOT%{_pr
 %delete_la
 
 %check
-%meson_test check || TESTS_ERROR=$?
+%meson_test || TESTS_ERROR=$?
 if [ "${TESTS_ERROR}" != "" ]; then
 cat src/test-suite.log
 exit $TESTS_ERROR
@@ -150,7 +178,6 @@ exit 0
 %{_libdir}/pulse-%{version}/modules/*.so
 %exclude %{_libdir}/pulse-%{version}/modules/module-equalizer-sink.so
 %exclude %{_libdir}/pulse-%{version}/modules/module-detect.so
-
 %{_prefix}/lib/udev/rules.d/90-pulseaudio.rules
 %{_libexecdir}/pulse/*-helper
 %{_datadir}/locale/*
@@ -164,7 +191,25 @@ exit 0
 %{_bindir}/qpaeq
 %{_libdir}/pulse-%{version}/modules/module-equalizer-sink.so
 
-%files devel
+%files module-bluetooth
+%{_libdir}/pulse-15.0/modules/libbluez*-util.so
+%{_libdir}/pulse-15.0/modules/module-bluez*-device.so
+%{_libdir}/pulse-15.0/modules/module-bluez*-discover.so
+%{_libdir}/pulse-15.0/modules/module-bluetooth-discover.so
+%{_libdir}/pulse-15.0/modules/module-bluetooth-policy.so
+	
+%files libs
+%dir %{_sysconfdir}/pulse/
+%config(noreplace) %{_sysconfdir}/pulse/client.conf
+%{_libdir}/libpulse.so.0*
+%{_libdir}/libpulse-simple.so.0*
+%dir %{_libdir}/pulseaudio/
+%{_libdir}/pulseaudio/libpulsecommon-15.0.so
+
+%files libs-glib2
+%{_libdir}/libpulse-mainloop-glib.so.0*
+
+%files libs-devel
 %defattr(-,root,root)
 %{_includedir}/pulse/
 %{_libdir}/*.so
@@ -178,6 +223,9 @@ exit 0
 %{_datadir}/glib-2.0/schemas/org.freedesktop.pulseaudio.gschema.xml
 
 %changelog
+* Fri Dec 10 2021 zhouwenpei <zhouwenpei1@huawei.com> - 15.0-2
+- fix build error and split packages
+
 * Sat Dec 4 2021 zhouwenpei <zhouwenpei1@huawei.com> - 15.0-1
 - update to version 15.0
 
