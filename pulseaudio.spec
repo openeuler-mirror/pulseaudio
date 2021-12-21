@@ -5,17 +5,17 @@
 
 Name:           pulseaudio
 Summary:        Improved Linux Sound Server
-Version:        13.0
-Release:        5
+Version:        15.0
+Release:        1
 License:        LGPLv2+
 URL:            https://www.freedesktop.org/wiki/Software/PulseAudio
 Source0:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz
-Source1:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz.sha256
+Source1:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz.sha256sum
 Source5:        default.pa-for-gdm
 
 Patch201:       pulseaudio-autostart.patch
-Patch202:       pulseaudio-9.0-disable_flat_volumes.patch
 
+BuildRequires:	meson
 BuildRequires:  automake libtool gcc-c++ bash-completion
 BuildRequires:  m4 libtool-ltdl-devel intltool pkgconfig doxygen xmltoman libsndfile-devel
 BuildRequires:  alsa-lib-devel glib2-devel gtk2-devel GConf2-devel avahi-devel check-devel
@@ -24,13 +24,14 @@ BuildRequires:  xorg-x11-proto-devel libXtst-devel libXi-devel libSM-devel libX1
 BuildRequires:  libICE-devel xcb-util-devel openssl-devel orc-devel libtdb-devel speexdsp-devel
 BuildRequires:  libasyncns-devel systemd-devel systemd dbus-devel libcap-devel fftw-devel
 BuildRequires:  webrtc-audio-processing-devel
+BuildRequires:	pkgconfig(gstreamer-1.0) pkgconfig(gstreamer-app-1.0) pkgconfig(gstreamer-rtp-1.0)
 
 Obsoletes:      padevchooser < 1.0
-Provides:       %{name}-module-x11 %{name}-module-bluetooth %{name}-libs %{name}-libs-glib2 %{name}-utils %{name}-esound-compat %{name}-module-zeroconf %{name}-module-gconf %{name}-module-gsettings
-Obsoletes:      %{name}-module-x11 %{name}-module-bluetooth %{name}-libs %{name}-libs-glib2 %{name}-utils %{name}-esound-compat %{name}-module-zeroconf %{name}-module-gconf %{name}-module-gsettings
+Provides:       %{name}-module-x11 %{name}-utils %{name}-esound-compat %{name}-module-zeroconf %{name}-module-gconf %{name}-module-gsettings
+Obsoletes:      %{name}-module-x11 %{name}-utils %{name}-esound-compat %{name}-module-zeroconf %{name}-module-gconf %{name}-module-gsettings
 
 Requires(pre):  shadow-utils
-Requires:       rtkit bluez >= 5.0
+Requires:       rtkit bluez >= 5.0 webrtc-audio-processing
 
 %description
 PulseAudio is a sound server for Linux and other Unix like operating
@@ -44,14 +45,39 @@ Requires:       python3-qt5 python3-dbus
 %description    qpaeq
 qpaeq is a equalizer interface for pulseaudio's equalizer sinks.
 
-%package        devel
+%package module-bluetooth
+Summary:        Bluetooth support for the PulseAudio sound server
+Requires:       %{name} = %{version}-%{release}
+Requires:       bluez >= 5.0
+	
+%description module-bluetooth
+Contains Bluetooth audio (A2DP/HSP/HFP) support for the PulseAudio sound server.
+
+%package libs
+Summary:        Libraries for PulseAudio clients
+License:        LGPLv2+
+Obsoletes:      pulseaudio-libs-zeroconf < 1.1
+
+%description libs
+This package contains the runtime libraries for any application that wishes
+to interface with a PulseAudio sound server.
+
+%package libs-glib2
+Summary:        GLIB 2.x bindings for PulseAudio clients
+License:        LGPLv2+
+Requires:       %{name}-libs = %{version}-%{release}
+ 
+%description libs-glib2
+This package contains bindings to integrate the PulseAudio client library with
+a GLIB 2.x based application.
+
+%package libs-devel
 Summary:        Headers and libraries for PulseAudio client development
 License:        LGPLv2+
-Requires:       %{name} = %{version}-%{release}
-Provides:       %{name}-libs-devel %{name}-libs-devel%{?_isa}
-Obsoletes:      %{name}-libs-devel
+Requires:       %{name}-libs = %{version}-%{release}
+Requires:       %{name}-libs-glib2 = %{version}-%{release}
 
-%description    devel
+%description libs-devel
 Headers and libraries for developing applications that can communicate with
 a PulseAudio sound server.
 
@@ -64,33 +90,34 @@ sed -i.no_consolekit -e \
   's/^load-module module-console-kit/#load-module module-console-kit/' \
   src/daemon/default.pa.in
 
-NOCONFIGURE=1 ./bootstrap.sh
 
 %build
-%configure \
-  --disable-silent-rules --disable-rpath --with-system-user=pulse \
-  --with-system-group=pulse --with-access-group=pulse-access \
-  --disable-oss-output --disable-jack --disable-lirc \
-  --disable-bluez4 --enable-bluez5 --enable-gconf \
-  --enable-gsettings --enable-webrtc-aec --enable-tests
+%meson \
+  -D system_user=pulse \
+  -D system_group=pulse \
+  -D access_group=pulse-access \
+  -D oss-output=disabled \
+  -D jack=disabled \
+  -D lirc=disabled \
+  -D tcpwrap=disabled \
+  -D bluez5=enabled \
+  -D gstreamer=enabled \
+  -D bluez5-gstreamer=enabled \
+  -D gsettings=enabled \
+  -D elogind=disabled \
+  -D valgrind=disabled \
+  -D gtk=disabled \
+  -D soxr=disabled \
+  -D webrtc-aec=enabled \
+  -D systemd=disabled \
+  -D tests=true
+ 
+%meson_build
 
-%make_build V=1
-
-make doxygen
+%meson_build doxygen
 
 %install
-%make_install
-
-%ifarch %{multilib_archs}
-pushd %{buildroot}%{_bindir}
-%if "%{_libdir}" == "/usr/lib"
-ln -s padsp padsp-32
-%else
-cp -a padsp padsp-32
-sed -i -e "s|%{_libdir}/pulseaudio/libpulsedsp.so|/usr/lib/pulseaudio/libpulsedsp.so|g" padsp-32
-%endif
-popd
-%endif
+%meson_install
 
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/lib/udev/rules.d
 mv -fv $RPM_BUILD_ROOT/lib/udev/rules.d/90-pulseaudio.rules $RPM_BUILD_ROOT%{_prefix}/lib/udev/rules.d
@@ -107,7 +134,7 @@ install -p -m644 %{name}-%{_arch}.conf $RPM_BUILD_ROOT/etc/ld.so.conf.d/
 
 
 %check
-%make_build check || TESTS_ERROR=$?
+%meson_test || TESTS_ERROR=$?
 if [ "${TESTS_ERROR}" != "" ]; then
 cat src/test-suite.log
 exit $TESTS_ERROR
@@ -144,8 +171,6 @@ exit 0
 %{_sysconfdir}/dbus-1/system.d/pulseaudio-system.conf
 %{_sysconfdir}/xdg/autostart/pulseaudio.desktop
 %{bash_completionsdir}/*
-%{_userunitdir}/pulseaudio.*
-%{_bindir}/esdcompat
 %{_bindir}/pulseaudio
 %{_bindir}/start-pulseaudio-x11
 %{_bindir}/pacat
@@ -156,31 +181,45 @@ exit 0
 %{_bindir}/pamon
 %{_bindir}/parecord
 %{_bindir}/pax11publish
-%{_bindir}/padsp
 %{_bindir}/pasuspender
 %{_bindir}/pa-info
-%ifarch %{multilib_archs}
-%{_bindir}/padsp-32
-%endif
 %{_libdir}/*.so.*
 %{_libdir}/pulseaudio/*.so
 %{_libdir}/pulse-%{version}/modules/*.so
 %exclude %{_libdir}/pulse-%{version}/modules/module-equalizer-sink.so
 %exclude %{_libdir}/pulse-%{version}/modules/module-detect.so
-
 %{_prefix}/lib/udev/rules.d/90-pulseaudio.rules
 %{_libexecdir}/pulse/*-helper
 %{_datadir}/locale/*
 %{_datadir}/pulseaudio/alsa-mixer/*/
 %{_datadir}/zsh/site-functions/_pulseaudio
 %{_datadir}/GConf/gsettings/pulseaudio.convert
+%config(noreplace) %{_sysconfdir}/xdg/Xwayland-session.d/00-pulseaudio-x11
 
 %files qpaeq
 %defattr(-,root,root)
 %{_bindir}/qpaeq
 %{_libdir}/pulse-%{version}/modules/module-equalizer-sink.so
 
-%files devel
+%files module-bluetooth
+%{_libdir}/pulse-15.0/modules/libbluez*-util.so
+%{_libdir}/pulse-15.0/modules/module-bluez*-device.so
+%{_libdir}/pulse-15.0/modules/module-bluez*-discover.so
+%{_libdir}/pulse-15.0/modules/module-bluetooth-discover.so
+%{_libdir}/pulse-15.0/modules/module-bluetooth-policy.so
+	
+%files libs
+%dir %{_sysconfdir}/pulse/
+%config(noreplace) %{_sysconfdir}/pulse/client.conf
+%{_libdir}/libpulse.so.0*
+%{_libdir}/libpulse-simple.so.0*
+%dir %{_libdir}/pulseaudio/
+%{_libdir}/pulseaudio/libpulsecommon-15.0.so
+
+%files libs-glib2
+%{_libdir}/libpulse-mainloop-glib.so.0*
+
+%files libs-devel
 %defattr(-,root,root)
 %{_includedir}/pulse/
 %{_libdir}/*.so
@@ -190,12 +229,14 @@ exit 0
 
 %files help
 %defattr(-,root,root)
-%doc README doxygen/html
 %{_mandir}/man*/*
 %{_datadir}/glib-2.0/schemas/org.freedesktop.pulseaudio.gschema.xml
 
 %changelog
-* Fri Sep 3 2021 zhouwenpei <zhouwenpei11@huawei.com> - 13.0-5
+* Tue Dec 21 2021 zhouwenpei <zhouwenpei1@huawei.com> - 15.0-1
+- update to version 15.0 and split packages
+
+* Fri Sep 3 2021 zhouwenpei <zhouwenpei1@huawei.com> - 13.0-5
 - delete rpath info
 
 * Fri Oct 30 2020 xinghe <xinghe1@huawei.com> - 13.0-4
