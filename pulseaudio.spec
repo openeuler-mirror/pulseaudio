@@ -6,7 +6,7 @@
 Name:           pulseaudio
 Summary:        Improved Linux Sound Server
 Version:        15.0
-Release:        1
+Release:        2
 License:        LGPLv2+
 URL:            https://www.freedesktop.org/wiki/Software/PulseAudio
 Source0:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz
@@ -23,7 +23,6 @@ BuildRequires:  libatomic_ops-static libatomic_ops-devel bluez-libs-devel sbc-de
 BuildRequires:  xorg-x11-proto-devel libXtst-devel libXi-devel libSM-devel libX11-devel
 BuildRequires:  libICE-devel xcb-util-devel openssl-devel orc-devel libtdb-devel speexdsp-devel
 BuildRequires:  libasyncns-devel systemd-devel systemd dbus-devel libcap-devel fftw-devel
-BuildRequires:  webrtc-audio-processing-devel
 BuildRequires:	pkgconfig(gstreamer-1.0) pkgconfig(gstreamer-app-1.0) pkgconfig(gstreamer-rtp-1.0)
 
 Obsoletes:      padevchooser < 1.0
@@ -31,7 +30,8 @@ Provides:       %{name}-module-x11 %{name}-utils %{name}-esound-compat %{name}-m
 Obsoletes:      %{name}-module-x11 %{name}-utils %{name}-esound-compat %{name}-module-zeroconf %{name}-module-gconf %{name}-module-gsettings
 
 Requires(pre):  shadow-utils
-Requires:       rtkit bluez >= 5.0 webrtc-audio-processing
+Requires:       rtkit
+
 
 %description
 PulseAudio is a sound server for Linux and other Unix like operating
@@ -108,7 +108,7 @@ sed -i.no_consolekit -e \
   -D valgrind=disabled \
   -D gtk=disabled \
   -D soxr=disabled \
-  -D webrtc-aec=enabled \
+  -D webrtc-aec=disabled \
   -D systemd=disabled \
   -D tests=true
  
@@ -123,14 +123,6 @@ mkdir -p $RPM_BUILD_ROOT%{_prefix}/lib/udev/rules.d
 mv -fv $RPM_BUILD_ROOT/lib/udev/rules.d/90-pulseaudio.rules $RPM_BUILD_ROOT%{_prefix}/lib/udev/rules.d
 
 %delete_la
-
-## delete rpath
-touch %{name}-%{_arch}.conf
-echo "%{_libdir}/pulse-%{version}/modules"  >> %{name}-%{_arch}.conf
-echo "%{_libdir}/%{name}/"  >> %{name}-%{_arch}.conf
-find $RPM_BUILD_ROOT/ -type f -exec file {} ';' | grep "ELF" | awk -F ':' '{print $1}' | xargs -i chrpath --delete {}
-mkdir -p $RPM_BUILD_ROOT/etc/ld.so.conf.d
-install -p -m644 %{name}-%{_arch}.conf $RPM_BUILD_ROOT/etc/ld.so.conf.d/
 
 
 %check
@@ -167,7 +159,6 @@ exit 0
 %config(noreplace) %{_sysconfdir}/pulse/daemon.conf
 %config(noreplace) %{_sysconfdir}/pulse/*.pa
 %config(noreplace) %{_sysconfdir}/pulse/client.conf
-%{_sysconfdir}/ld.so.conf.d/%{name}-%{_arch}.conf
 %{_sysconfdir}/dbus-1/system.d/pulseaudio-system.conf
 %{_sysconfdir}/xdg/autostart/pulseaudio.desktop
 %{bash_completionsdir}/*
@@ -184,10 +175,19 @@ exit 0
 %{_bindir}/pasuspender
 %{_bindir}/pa-info
 %{_libdir}/*.so.*
+%exclude %{_libdir}/libpulse.so.0*
+%exclude %{_libdir}/libpulse-simple.so.0*
+%exclude %{_libdir}/libpulse-mainloop-glib.so.0*
 %{_libdir}/pulseaudio/*.so
+%exclude %{_libdir}/pulseaudio/libpulsecommon-%{version}.so
 %{_libdir}/pulse-%{version}/modules/*.so
 %exclude %{_libdir}/pulse-%{version}/modules/module-equalizer-sink.so
 %exclude %{_libdir}/pulse-%{version}/modules/module-detect.so
+%exclude %{_libdir}/pulse-%{version}/modules/libbluez*-util.so
+%exclude %{_libdir}/pulse-%{version}/modules/module-bluez*-device.so
+%exclude %{_libdir}/pulse-%{version}/modules/module-bluez*-discover.so
+%exclude %{_libdir}/pulse-%{version}/modules/module-bluetooth-discover.so
+%exclude %{_libdir}/pulse-%{version}/modules/module-bluetooth-policy.so
 %{_prefix}/lib/udev/rules.d/90-pulseaudio.rules
 %{_libexecdir}/pulse/*-helper
 %{_datadir}/locale/*
@@ -202,11 +202,11 @@ exit 0
 %{_libdir}/pulse-%{version}/modules/module-equalizer-sink.so
 
 %files module-bluetooth
-%{_libdir}/pulse-15.0/modules/libbluez*-util.so
-%{_libdir}/pulse-15.0/modules/module-bluez*-device.so
-%{_libdir}/pulse-15.0/modules/module-bluez*-discover.so
-%{_libdir}/pulse-15.0/modules/module-bluetooth-discover.so
-%{_libdir}/pulse-15.0/modules/module-bluetooth-policy.so
+%{_libdir}/pulse-%{version}/modules/libbluez*-util.so
+%{_libdir}/pulse-%{version}/modules/module-bluez*-device.so
+%{_libdir}/pulse-%{version}/modules/module-bluez*-discover.so
+%{_libdir}/pulse-%{version}/modules/module-bluetooth-discover.so
+%{_libdir}/pulse-%{version}/modules/module-bluetooth-policy.so
 	
 %files libs
 %dir %{_sysconfdir}/pulse/
@@ -214,7 +214,7 @@ exit 0
 %{_libdir}/libpulse.so.0*
 %{_libdir}/libpulse-simple.so.0*
 %dir %{_libdir}/pulseaudio/
-%{_libdir}/pulseaudio/libpulsecommon-15.0.so
+%{_libdir}/pulseaudio/libpulsecommon-%{version}.so
 
 %files libs-glib2
 %{_libdir}/libpulse-mainloop-glib.so.0*
@@ -233,6 +233,9 @@ exit 0
 %{_datadir}/glib-2.0/schemas/org.freedesktop.pulseaudio.gschema.xml
 
 %changelog
+* Thu Jan 6 2021 zhouwenpei <zhouwenpei1@huawei.com> - 15.0-2
+- clean up .so and disabled webrtc-aec
+
 * Tue Dec 21 2021 zhouwenpei <zhouwenpei1@huawei.com> - 15.0-1
 - update to version 15.0 and split packages
 
