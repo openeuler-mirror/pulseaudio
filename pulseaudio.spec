@@ -6,7 +6,7 @@
 Name:           pulseaudio
 Summary:        Improved Linux Sound Server
 Version:        15.0
-Release:        2
+Release:        3
 License:        LGPLv2+
 URL:            https://www.freedesktop.org/wiki/Software/PulseAudio
 Source0:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz
@@ -18,7 +18,7 @@ Patch201:       pulseaudio-autostart.patch
 BuildRequires:	meson
 BuildRequires:  automake libtool gcc-c++ bash-completion
 BuildRequires:  m4 libtool-ltdl-devel intltool pkgconfig doxygen xmltoman libsndfile-devel
-BuildRequires:  alsa-lib-devel glib2-devel gtk2-devel GConf2-devel avahi-devel check-devel
+BuildRequires:  alsa-lib-devel glib2-devel gtk2-devel avahi-devel check-devel
 BuildRequires:  libatomic_ops-static libatomic_ops-devel bluez-libs-devel sbc-devel libXt-devel
 BuildRequires:  xorg-x11-proto-devel libXtst-devel libXi-devel libSM-devel libX11-devel
 BuildRequires:  libICE-devel xcb-util-devel openssl-devel orc-devel libtdb-devel speexdsp-devel
@@ -26,8 +26,8 @@ BuildRequires:  libasyncns-devel systemd-devel systemd dbus-devel libcap-devel f
 BuildRequires:	pkgconfig(gstreamer-1.0) pkgconfig(gstreamer-app-1.0) pkgconfig(gstreamer-rtp-1.0)
 
 Obsoletes:      padevchooser < 1.0
-Provides:       %{name}-module-x11 %{name}-utils %{name}-esound-compat %{name}-module-zeroconf %{name}-module-gconf %{name}-module-gsettings
-Obsoletes:      %{name}-module-x11 %{name}-utils %{name}-esound-compat %{name}-module-zeroconf %{name}-module-gconf %{name}-module-gsettings
+Provides:       %{name}-module-x11 %{name}-utils %{name}-esound-compat %{name}-module-zeroconf %{name}-module-gsettings
+Obsoletes:      %{name}-module-x11 %{name}-utils %{name}-esound-compat %{name}-module-zeroconf %{name}-module-gsettings
 
 Requires(pre):  shadow-utils
 Requires:       rtkit
@@ -233,6 +233,9 @@ exit 0
 %{_datadir}/glib-2.0/schemas/org.freedesktop.pulseaudio.gschema.xml
 
 %changelog
+* Mon Jan 17 2021 zhouwenpei <zhouwenpei1@huawei.com> - 15.0-3
+- remove dependency on GConf2 package
+
 * Thu Jan 6 2021 zhouwenpei <zhouwenpei1@huawei.com> - 15.0-2
 - clean up .so and disabled webrtc-aec
 
