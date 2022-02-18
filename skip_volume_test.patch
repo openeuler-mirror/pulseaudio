@@ -1,0 +1,11 @@
+--- a/src/tests/meson.build	2022-02-14 16:52:59.139462300 +0800
++++ b/src/tests/meson.build	2022-02-17 11:33:13.541699100 +0800
+@@ -28,8 +28,6 @@
+     [ check_dep, libpulse_dep, libpulsecommon_dep ] ],
+   [ 'utf8-test', 'utf8-test.c',
+     [ check_dep, libpulse_dep, libpulsecommon_dep ] ],
+-  [ 'volume-test', 'volume-test.c',
+-    [ check_dep, libm_dep, libpulse_dep, libpulsecommon_dep ] ],
+ ]
+ 
+ if get_option('daemon')

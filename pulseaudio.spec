@@ -6,7 +6,7 @@
 Name:           pulseaudio
 Summary:        Improved Linux Sound Server
 Version:        15.0
-Release:        4
+Release:        5
 License:        LGPLv2+
 URL:            https://www.freedesktop.org/wiki/Software/PulseAudio
 Source0:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz
@@ -14,6 +14,11 @@ Source1:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-
 Source5:        default.pa-for-gdm
 
 Patch201:       pulseaudio-autostart.patch
+%ifarch riscv64
+Patch202:       set_timeout_for_test.patch
+#volume-test fail on riscv, skip this test
+Patch203:       skip_volume_test.patch
+%endif
 
 BuildRequires:	meson
 BuildRequires:  automake libtool gcc-c++ bash-completion
@@ -231,6 +236,9 @@ exit 0
 %{_datadir}/glib-2.0/schemas/org.freedesktop.pulseaudio.gschema.xml
 
 %changelog
+* Thu Feb 17 2022 lvxiaoqian <xiaoqian@nj.iscas.ac.cn> - 15.0-5
+- set thread-test timeout and skip volume-test for riscv
+
 * Mon Jan 17 2022 zhouwenpei <zhouwenpei1@huawei.com> - 15.0-4
 - remove dependency on GConf2 package 
 

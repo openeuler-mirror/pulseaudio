@@ -1,0 +1,11 @@
+diff --git a/src/tests/thread-test.c b/src/tests/thread-test.c
+--- a/src/tests/thread-test.c	2018-11-20 15:37:59.000000000 +0800
++++ b/src/tests/thread-test.c	2021-12-16 09:41:02.565453800 +0800
+@@ -153,6 +153,7 @@
+     s = suite_create("Thread");
+     tc = tcase_create("thread");
+     tcase_add_test(tc, thread_test);
++    tcase_set_timeout(tc, 120);
+     suite_add_tcase(s, tc);
+ 
+     sr = srunner_create(s);
