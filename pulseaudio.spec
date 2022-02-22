@@ -6,7 +6,7 @@
 Name:           pulseaudio
 Summary:        Improved Linux Sound Server
 Version:        15.0
-Release:        5
+Release:        6
 License:        LGPLv2+
 URL:            https://www.freedesktop.org/wiki/Software/PulseAudio
 Source0:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz
@@ -236,6 +236,9 @@ exit 0
 %{_datadir}/glib-2.0/schemas/org.freedesktop.pulseaudio.gschema.xml
 
 %changelog
+* Thu Feb 22 2022 lvxiaoqian <xiaoqian@nj.iscas.ac.cn> - 15.0-6
+- set srbchannel-test timeout
+
 * Thu Feb 17 2022 lvxiaoqian <xiaoqian@nj.iscas.ac.cn> - 15.0-5
 - set thread-test timeout and skip volume-test for riscv
 
