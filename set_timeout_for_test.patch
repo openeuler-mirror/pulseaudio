@@ -9,3 +9,13 @@ diff --git a/src/tests/thread-test.c b/src/tests/thread-test.c
      suite_add_tcase(s, tc);
  
      sr = srunner_create(s);
+--- a/src/tests/srbchannel-test.c	2022-02-22 09:30:10.966156100 +0800
++++ b/src/tests/srbchannel-test.c	2022-02-22 09:33:27.926771100 +0800
+@@ -134,6 +134,7 @@
+     s = suite_create("srbchannel");
+     tc = tcase_create("srbchannel");
+     tcase_add_test(tc, srbchannel_test);
++    tcase_set_timeout(tc, 60);
+     suite_add_tcase(s, tc);
+ 
+     sr = srunner_create(s);
