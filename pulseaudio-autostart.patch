@@ -13,7 +13,7 @@ index 722a639..7cdf14e 100755
  set -e
  
 +# probe to test if autospawn works, else resort to starting manually
-+@PACTL_BINARY@ info > /dev/null 2>&1 || @PA_BINARY@ --start "$@"
++@PACTL_BINARY@ info > /dev/null 2>&1 || /usr/bin/pulseaudio --start "$@"
 +
  if [ -n "$1" ] ; then
      case $1 in
