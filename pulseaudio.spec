@@ -6,7 +6,7 @@
 Name:           pulseaudio
 Summary:        Improved Linux Sound Server
 Version:        15.0
-Release:        6
+Release:        7
 License:        LGPLv2+
 URL:            https://www.freedesktop.org/wiki/Software/PulseAudio
 Source0:        https://freedesktop.org/software/pulseaudio/releases/pulseaudio-%{version}.tar.xz
@@ -236,6 +236,11 @@ exit 0
 %{_datadir}/glib-2.0/schemas/org.freedesktop.pulseaudio.gschema.xml
 
 %changelog
+* Tue Jun 07 2022 jchzhou <jchzhou@outlook.com> - 15.0-7
+- backport an upstream fix of autostart script
+Credit: @tanyulong2021 via gitee.com/src-openeuler/pulseaudio/pulls/35
+Credit: Rex Dieter @rdieter via src.fedoraproject.org/rpms/pulseaudio/
+
 * Thu Feb 22 2022 lvxiaoqian <xiaoqian@nj.iscas.ac.cn> - 15.0-6
 - set srbchannel-test timeout
 
